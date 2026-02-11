@@ -1,491 +1,479 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coaching Dashboard — Chatting Wizard</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
-            min-height: 100vh;
-        }
-        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coaching Dashboard — Chatting Wizard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
 
-        /* Header */
-        .header {
-            text-align: center; padding: 40px 20px 20px;
-        }
-        .header h1 { font-size: 2.2em; font-weight: 700; color: #58a6ff; margin-bottom: 8px; }
-        .header .subtitle { color: #8b949e; font-size: 1em; }
-        .header .generated { color: #484f58; font-size: 0.85em; margin-top: 8px; }
-        .back-link { display: inline-block; color: #58a6ff; text-decoration: none; font-size: 0.9em; margin-bottom: 16px; }
-        .back-link:hover { text-decoration: underline; }
+/* Header */
+.hdr{text-align:center;padding:36px 20px 16px;position:relative}
+.hdr h1{font-size:2em;font-weight:700;color:#58a6ff;margin-bottom:4px}
+.hdr p{color:#8b949e;font-size:.9em}
+.hdr .ts{color:#484f58;font-size:.8em;margin-top:6px}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#3fb950;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-        /* Top stats */
-        .top-stats {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px; margin-bottom: 32px;
-        }
-        .top-stat {
-            background: #161b22; border-radius: 12px; padding: 20px;
-            border: 1px solid #30363d;
-        }
-        .top-stat .number { font-size: 32px; font-weight: 700; color: #e6edf3; }
-        .top-stat .label { font-size: 13px; color: #8b949e; margin-top: 4px; }
+/* Nav tabs */
+.nav{display:flex;justify-content:center;gap:4px;padding:8px 20px;flex-wrap:wrap;position:sticky;top:0;background:#0d1117;z-index:100;border-bottom:1px solid #21262d}
+.nav button{background:#161b22;border:1px solid #30363d;color:#8b949e;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em;font-weight:500;transition:all .2s}
+.nav button:hover{border-color:#58a6ff;color:#e6edf3}
+.nav button.active{background:#58a6ff22;border-color:#58a6ff;color:#58a6ff}
 
-        /* Alert */
-        .alert {
-            border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;
-            font-size: 14px;
-        }
-        .alert-warning {
-            background: #161b22; border: 1px solid #d2992244; color: #d29922;
-        }
-        .alert-warning strong { color: #e6edf3; }
+/* Container */
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.section{display:none}.section.active{display:block}
 
-        /* Section */
-        .section-title {
-            font-size: 1.1em; color: #8b949e; text-transform: uppercase;
-            letter-spacing: 1px; margin: 32px 0 16px; padding-bottom: 8px;
-            border-bottom: 1px solid #21262d;
-        }
+/* Top stats row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px;text-align:center;transition:border-color .2s}
+.stat-card:hover{border-color:#58a6ff}
+.stat-card .num{font-size:2em;font-weight:700}
+.stat-card .lbl{font-size:.75em;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 
-        /* TL Cards */
-        .tl-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 16px; margin-bottom: 32px;
-        }
-        .tl-card {
-            background: #161b22; border-radius: 12px; padding: 24px;
-            border: 1px solid #30363d; transition: border-color 0.2s;
-        }
-        .tl-card:hover { border-color: #58a6ff; }
-        .tl-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
-        .tl-header h2 { font-size: 1.3em; font-weight: 700; color: #e6edf3; }
-        .tl-shift { font-size: 0.8em; color: #8b949e; background: #1c2129; padding: 2px 8px; border-radius: 4px; }
-        .tl-stats { display: flex; gap: 24px; margin-bottom: 16px; }
-        .stat { text-align: center; }
-        .stat-number { font-size: 1.5em; font-weight: 700; color: #e6edf3; }
-        .stat-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
+/* TL summary cards */
+.tl-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:28px}
+.tl-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;cursor:pointer;transition:all .25s}
+.tl-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.tl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.tl-name{font-size:1.2em;font-weight:700}
+.tl-shift-badge{font-size:.75em;padding:3px 10px;border-radius:20px;font-weight:600}
+.tl-nums{display:flex;gap:20px;margin-bottom:14px}
+.tl-nums .n{text-align:center;flex:1}
+.tl-nums .n .v{font-size:1.4em;font-weight:700}
+.tl-nums .n .l{font-size:.65em;color:#8b949e;text-transform:uppercase}
+.bar-bg{height:6px;background:#21262d;border-radius:3px;overflow:hidden;margin-bottom:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.bar-label{font-size:.75em;color:#8b949e}
 
-        /* Progress bar */
-        .progress-bar-container {
-            height: 6px; background: #21262d; border-radius: 3px; margin-bottom: 6px; overflow: hidden;
-        }
-        .progress-bar { height: 100%; border-radius: 3px; transition: width 0.5s; }
-        .progress-label { font-size: 0.8em; color: #8b949e; margin-bottom: 16px; }
+/* Search */
+.search-box{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.search-box input{background:#161b22;border:1px solid #30363d;color:#e6edf3;padding:8px 14px;border-radius:8px;font-size:.9em;flex:1;min-width:200px;outline:none}
+.search-box input:focus{border-color:#58a6ff}
+.filter-btn{background:#161b22;border:1px solid #30363d;color:#8b949e;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:.8em;transition:all .2s}
+.filter-btn:hover,.filter-btn.on{background:#58a6ff22;border-color:#58a6ff;color:#58a6ff}
 
-        /* Chatter table */
-        .chatter-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .chatter-table th {
-            text-align: left; padding: 8px 6px; color: #8b949e; font-weight: 500;
-            border-bottom: 1px solid #21262d; font-size: 0.7em; text-transform: uppercase;
-        }
-        .chatter-table td { padding: 8px 6px; border-bottom: 1px solid #161b22; }
-        .chatter-name { font-weight: 500; color: #e6edf3; }
+/* Sort buttons */
+.sort-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.sort-btn{background:none;border:1px solid #30363d;color:#8b949e;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.75em}
+.sort-btn:hover,.sort-btn.active{border-color:#58a6ff;color:#58a6ff}
 
-        /* Badges */
-        .badge {
-            display: inline-block; padding: 2px 8px; border-radius: 20px;
-            font-size: 0.7em; font-weight: 600;
-        }
-        .badge-red { background: #f8514922; color: #f85149; border: 1px solid #f8514933; }
-        .badge-yellow { background: #d2992222; color: #d29922; border: 1px solid #d2992233; }
-        .badge-green { background: #3fb95022; color: #3fb950; border: 1px solid #3fb95033; }
+/* Chatter grid */
+.chatter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px}
+.ch-card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden;transition:border-color .2s}
+.ch-card:hover{border-color:#58a6ff}
+.ch-card.alarm{border-left:3px solid #f85149}
+.ch-main{padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.ch-left{flex:1}
+.ch-name{font-weight:600;font-size:.95em;margin-bottom:4px}
+.ch-meta{display:flex;gap:6px;flex-wrap:wrap}
+.ch-right{text-align:right}
+.ch-urg{font-size:1.6em;font-weight:700;line-height:1}
+.ch-urg-label{font-size:.6em;color:#8b949e;text-transform:uppercase}
 
-        /* Tags */
-        .tag {
-            display: inline-block; padding: 2px 6px; border-radius: 4px;
-            font-size: 0.75em; margin-right: 4px;
-        }
-        .tag-red { background: #f8514922; color: #f85149; }
-        .tag-orange { background: #d2992222; color: #d29922; }
-        .tag-ok { background: #3fb95022; color: #3fb950; }
+/* Badge */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.7em;font-weight:600}
+.b-red{background:#f8514922;color:#f85149;border:1px solid #f8514933}
+.b-yellow{background:#d2992222;color:#d29922;border:1px solid #d2992233}
+.b-green{background:#3fb95022;color:#3fb950;border:1px solid #3fb95033}
+.b-blue{background:#58a6ff22;color:#58a6ff;border:1px solid #58a6ff33}
+.tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:.7em;margin-right:3px}
+.t-red{background:#f8514922;color:#f85149}.t-orange{background:#d2992222;color:#d29922}
+.t-green{background:#3fb95022;color:#3fb950}.t-blue{background:#58a6ff22;color:#58a6ff}
 
-        /* KPI alarm table */
-        .alarm-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .alarm-table th {
-            text-align: left; padding: 10px 8px; color: #8b949e; font-weight: 500;
-            border-bottom: 1px solid #21262d; font-size: 0.7em; text-transform: uppercase;
-        }
-        .alarm-table td {
-            padding: 10px 8px; border-bottom: 1px solid #161b22;
-        }
+/* Expanded detail */
+.ch-detail{display:none;padding:0 16px 14px;border-top:1px solid #21262d}
+.ch-detail.open{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:10px 0}
+.kpi-item{background:#0d1117;border-radius:6px;padding:8px 10px}
+.kpi-label{font-size:.65em;color:#8b949e;text-transform:uppercase;margin-bottom:2px}
+.kpi-val{font-size:1.1em;font-weight:700}
+.kpi-bar{height:4px;background:#21262d;border-radius:2px;margin-top:4px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:2px}
+.detail-section{margin-top:10px}
+.detail-section h4{font-size:.75em;color:#8b949e;text-transform:uppercase;margin-bottom:6px}
+.detail-section p{font-size:.85em;color:#e6edf3;margin-bottom:4px}
+.err-item{font-size:.8em;color:#d29922;margin-bottom:4px;padding-left:10px;border-left:2px solid #d2992244}
 
-        /* Logs */
-        .log-entry {
-            padding: 12px 16px; border-bottom: 1px solid #161b22;
-        }
-        .log-entry:last-child { border-bottom: none; }
-        .log-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .log-date { color: #8b949e; font-size: 0.8em; font-weight: 500; }
-        .log-tl { color: #58a6ff; font-weight: 600; font-size: 0.9em; }
-        .log-arrow { color: #484f58; }
-        .log-chatter { color: #e6edf3; font-weight: 500; font-size: 0.9em; }
-        .log-meta { color: #8b949e; font-size: 0.8em; }
-        .log-notes { color: #8b949e; font-size: 0.8em; margin-top: 4px; padding-left: 4px; }
-        .logs-container {
-            background: #161b22; border-radius: 12px; border: 1px solid #30363d;
-            overflow: hidden;
-        }
-        .empty-state {
-            text-align: center; padding: 40px; color: #484f58;
-        }
-        .empty-state p { margin: 4px 0; }
+/* Table */
+.log-table{width:100%;border-collapse:collapse;font-size:.85em}
+.log-table th{text-align:left;padding:10px 8px;color:#8b949e;font-weight:500;border-bottom:1px solid #21262d;font-size:.75em;text-transform:uppercase}
+.log-table td{padding:10px 8px;border-bottom:1px solid #161b22}
+.log-table tr:hover td{background:#161b2288}
+.log-notes-cell{color:#8b949e;font-size:.85em;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .tl-grid { grid-template-columns: 1fr; }
-            .top-stats { grid-template-columns: repeat(2, 1fr); }
-            .container { padding: 16px; }
-        }
-    </style>
+/* Alarms table */
+.alarm-card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden}
+
+/* Empty state */
+.empty{text-align:center;padding:40px;color:#484f58}
+.empty p{margin:4px 0}
+
+/* Alert banner */
+.alert-banner{background:#161b22;border:1px solid #d2992244;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:.9em;color:#d29922}
+.alert-banner strong{color:#e6edf3}
+
+/* Responsive */
+@media(max-width:768px){
+  .tl-row,.chatter-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .container{padding:12px}
+  .nav{gap:3px;padding:6px 10px}
+  .nav button{padding:6px 10px;font-size:.8em}
+}
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>Coaching Dashboard</h1>
-        <p>Team coaching overview — Chatting Wizard</p>
-        <div class="generated">Last updated: 2026-02-11 13:02 UTC</div>
+
+<div class="hdr">
+  <h1>Coaching Dashboard</h1>
+  <p>Chatting Wizard — Team Coaching Overview</p>
+  <div class="ts" id="genTime"></div>
+</div>
+
+<div class="nav" id="nav">
+  <button class="active" data-tab="overview">Overview</button>
+  <button data-tab="huckle">Huckle</button>
+  <button data-tab="danilyn">Danilyn</button>
+  <button data-tab="ezekiel">Ezekiel</button>
+  <button data-tab="alarms">KPI Alarms</button>
+  <button data-tab="activity">Activity Log</button>
+</div>
+
+<div class="container">
+  <!-- OVERVIEW -->
+  <div class="section active" id="sec-overview">
+    <div class="stats-row" id="topStats"></div>
+    <div id="alertBanner"></div>
+    <div class="tl-row" id="tlCards"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:1em;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:1px">All Chatters</div>
     </div>
-
-    <div class="container">
-
-        <div class="top-stats">
-            <div class="top-stat">
-                <div class="number">31</div>
-                <div class="label">Active Chatters</div>
-            </div>
-            <div class="top-stat">
-                <div class="number">0</div>
-                <div class="label">Coaching Sessions</div>
-            </div>
-            <div class="top-stat">
-                <div class="number" style="color: #f85149">10</div>
-                <div class="label">KPI Alarms</div>
-            </div>
-            <div class="top-stat">
-                <div class="number">0</div>
-                <div class="label">Unassigned</div>
-            </div>
-        </div>
-
-        
-
-        <div class="section-title">Teams</div>
-        <div class="tl-grid">
-            
-        <div class="tl-card">
-            <div class="tl-header">
-                <h2>Huckle</h2>
-                <span class="tl-shift">12:00AM – 8:00AM UTC</span>
-            </div>
-            <div class="tl-stats">
-                <div class="stat">
-                    <div class="stat-number">11</div>
-                    <div class="stat-label">Chatters</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Sessions this week</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number" style="color: #f85149">4</div>
-                    <div class="stat-label">KPI Alarms</div>
-                </div>
-            </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" style="width: 0%; background: #f85149"></div>
-            </div>
-            <div class="progress-label">0/11 coached this week (0%)</div>
-            <table class="chatter-table">
-                <thead><tr><th>Chatter</th><th>Last coached</th><th>Issues</th></tr></thead>
-                <tbody>
-            <tr>
-                <td class="chatter-name">Samantha Vanguardia</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">3 KPI</span><span class="tag tag-orange">2 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Amos Wanjala</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">3 KPI</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Adedeji Oyeniran</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">1 KPI</span><span class="tag tag-orange">3 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">MARY WAMBUI GITHIGE</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">7 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Dionefel Mamites</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">8 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Don Mc Rey Parone</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">1 KPI</span><span class="tag tag-orange">1 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">JOHN ARSEL MUHI </td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">4 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Steven Mwamuye</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">1 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Angel Joyce Ranosa</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-ok">OK</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Earl Clyde Leinand Ty</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-ok">OK</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Allonah Yvonne D. Tumampos</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-ok">OK</span></td>
-            </tr></tbody>
-            </table>
-        </div>
-        <div class="tl-card">
-            <div class="tl-header">
-                <h2>Danilyn</h2>
-                <span class="tl-shift">8:00AM – 4:00PM UTC</span>
-            </div>
-            <div class="tl-stats">
-                <div class="stat">
-                    <div class="stat-number">11</div>
-                    <div class="stat-label">Chatters</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Sessions this week</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number" style="color: #f85149">4</div>
-                    <div class="stat-label">KPI Alarms</div>
-                </div>
-            </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" style="width: 0%; background: #f85149"></div>
-            </div>
-            <div class="progress-label">0/11 coached this week (0%)</div>
-            <table class="chatter-table">
-                <thead><tr><th>Chatter</th><th>Last coached</th><th>Issues</th></tr></thead>
-                <tbody>
-            <tr>
-                <td class="chatter-name">Hannah Andrea Ibañez</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">3 KPI</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Yhana Jean Aguelo</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">3 KPI</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Ruztinn Josef Francisco</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">2 KPI</span><span class="tag tag-orange">1 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">martin john aguilar</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">6 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Cris John Lacno</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">8 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Ralf Zyre Bambalan</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">6 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Adriane Ellor Sulita</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">1 KPI</span><span class="tag tag-orange">2 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Cezar E. Edades Jr</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">5 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Leny Rose L. Noma</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">3 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Fiona Ajiambo</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">2 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Kokoette Okon Umanah</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-ok">OK</span></td>
-            </tr></tbody>
-            </table>
-        </div>
-        <div class="tl-card">
-            <div class="tl-header">
-                <h2>Ezekiel</h2>
-                <span class="tl-shift">4:00PM – 12:00AM UTC</span>
-            </div>
-            <div class="tl-stats">
-                <div class="stat">
-                    <div class="stat-number">9</div>
-                    <div class="stat-label">Chatters</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Sessions this week</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number" style="color: #f85149">2</div>
-                    <div class="stat-label">KPI Alarms</div>
-                </div>
-            </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" style="width: 0%; background: #f85149"></div>
-            </div>
-            <div class="progress-label">0/9 coached this week (0%)</div>
-            <table class="chatter-table">
-                <thead><tr><th>Chatter</th><th>Last coached</th><th>Issues</th></tr></thead>
-                <tbody>
-            <tr>
-                <td class="chatter-name">Princess Diane Manalo</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">6 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Rachael Yvonne Murugi</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">1 KPI</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Emmanuel Okoth Owino</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-red">1 KPI</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Matt Yuri V. Albarillo</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">1 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Jhunmar Velasco</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">1 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Sheenmy A. Miro</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-orange">1 errors</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Edgar Danson </td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-ok">OK</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Trishia Izze Casangyao</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-ok">OK</span></td>
-            </tr>
-            <tr>
-                <td class="chatter-name">Kimberly Gaile Diaz Bacani</td>
-                <td><span class="badge badge-red">Never coached</span></td>
-                <td><span class="tag tag-ok">OK</span></td>
-            </tr></tbody>
-            </table>
-        </div>
-        </div>
-
-        <div class="section-title">KPI Alarms</div>
-        <div class="logs-container">
-            <table class="alarm-table">
-                <thead><tr><th>Chatter</th><th>Team</th><th>Alarms</th></tr></thead>
-                <tbody>
-                    
-        <tr>
-            <td class="chatter-name">Don Mc Rey Parone</td>
-            <td>Team Huckle</td>
-            <td><span class="tag tag-red">CVR: 2.93%</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Amos Wanjala</td>
-            <td>Team Huckle</td>
-            <td><span class="tag tag-red">Sales/hr: $7.10</span> <span class="tag tag-red">CVR: 4.98%</span> <span class="tag tag-red">Unlock Rate: 18.68%</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Adedeji Oyeniran</td>
-            <td>Team Huckle</td>
-            <td><span class="tag tag-red">Sales/hr: $6.72</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Hannah Andrea Ibañez</td>
-            <td>Team Danilyn</td>
-            <td><span class="tag tag-red">Sales/hr: $1.32</span> <span class="tag tag-red">CVR: 2.22%</span> <span class="tag tag-red">Golden Ratio: 0.80%</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Rachael Yvonne Murugi</td>
-            <td>Team Ezekiel</td>
-            <td><span class="tag tag-red">Sales/hr: $8.18</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Adriane Ellor Sulita</td>
-            <td>Team Danilyn</td>
-            <td><span class="tag tag-red">CVR: 4.95%</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Samantha Vanguardia</td>
-            <td>Team Huckle</td>
-            <td><span class="tag tag-red">Sales/hr: $6.12</span> <span class="tag tag-red">CVR: 2.37%</span> <span class="tag tag-red">Golden Ratio: 0.25%</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Yhana Jean Aguelo</td>
-            <td>Team Danilyn</td>
-            <td><span class="tag tag-red">Sales/hr: $8.56</span> <span class="tag tag-red">CVR: 2.14%</span> <span class="tag tag-red">Golden Ratio: 0.79%</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Ruztinn Josef Francisco</td>
-            <td>Team Danilyn</td>
-            <td><span class="tag tag-red">Sales/hr: $8.50</span> <span class="tag tag-red">CVR: 3.89%</span></td>
-        </tr>
-        <tr>
-            <td class="chatter-name">Emmanuel Okoth Owino</td>
-            <td>Team Ezekiel</td>
-            <td><span class="tag tag-red">Sales/hr: $5.93</span></td>
-        </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section-title">Recent Coaching Sessions</div>
-        <div class="logs-container">
-            
-        <div class="empty-state">
-            <p>No coaching sessions logged yet.</p>
-            <p>TLs need to start using the coaching form.</p>
-        </div>
-        </div>
+    <div class="search-box">
+      <input type="text" id="searchAll" placeholder="Search chatter...">
+      <button class="filter-btn on" data-f="all" onclick="toggleFilter(this,'overview')">All</button>
+      <button class="filter-btn" data-f="alarm" onclick="toggleFilter(this,'overview')">With Alarms</button>
+      <button class="filter-btn" data-f="nocoach" onclick="toggleFilter(this,'overview')">Never Coached</button>
     </div>
+    <div class="sort-bar">
+      <button class="sort-btn active" data-s="urgency" onclick="setSort(this,'overview')">Urgency</button>
+      <button class="sort-btn" data-s="name" onclick="setSort(this,'overview')">Name</button>
+      <button class="sort-btn" data-s="days" onclick="setSort(this,'overview')">Days Since</button>
+      <button class="sort-btn" data-s="alarms" onclick="setSort(this,'overview')">Alarms</button>
+    </div>
+    <div class="chatter-grid" id="allChatters"></div>
+  </div>
+
+  <!-- TL DETAIL TABS -->
+  <div class="section" id="sec-huckle"></div>
+  <div class="section" id="sec-danilyn"></div>
+  <div class="section" id="sec-ezekiel"></div>
+
+  <!-- ALARMS -->
+  <div class="section" id="sec-alarms">
+    <div style="font-size:1em;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px">KPI Alarms</div>
+    <div class="alarm-card"><table class="log-table" id="alarmTable"></table></div>
+  </div>
+
+  <!-- ACTIVITY LOG -->
+  <div class="section" id="sec-activity">
+    <div style="font-size:1em;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px">Recent Coaching Sessions</div>
+    <div class="alarm-card" id="activityContainer"></div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:30px;color:#484f58;font-size:.75em">
+  Chatting Wizard — Coaching Dashboard — 2026<br>Management use only
+</div>
+
+<script>
+// ── DATA (injected by Python) ──
+const D = {"chatters": [{"name": "Samantha Vanguardia", "team": "huckle", "team_display": "Team Huckle", "urgency": 84, "days_since": -1, "kpi": {"name": "Samantha Vanguardia", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$6.12", "golden": "0.25%", "unlock": "42.86%", "cvr": "2.37%", "reply_time": "03:34", "msg_hr": "73.00"}, "alarms": [{"metric": "Sales/hr", "value": "$6.12", "threshold": 10}, {"metric": "CVR", "value": "2.37%", "threshold": 5}, {"metric": "Golden Ratio", "value": "0.25%", "threshold": 1}], "alarm_count": 3, "errors": 2, "recent_errors": [{"date": "2026-02-05", "text": "The question “Are you going to open it once I send it?” interrupts a moment where the fan is already fully primed and ve"}, {"date": "2026-02-04", "text": "While the intent to gather the fan’s personal info is valid, the timing here disrupts a high-arousal moment that was alr"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Amos Wanjala", "team": "huckle", "team_display": "Team Huckle", "urgency": 76, "days_since": -1, "kpi": {"name": "Amos Wanjala", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$7.10", "golden": "4.37%", "unlock": "18.68%", "cvr": "4.98%", "reply_time": "01:25", "msg_hr": "52.66"}, "alarms": [{"metric": "Sales/hr", "value": "$7.10", "threshold": 10}, {"metric": "CVR", "value": "4.98%", "threshold": 5}, {"metric": "Unlock Rate", "value": "18.68%", "threshold": 20}], "alarm_count": 3, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Hannah Andrea Ibañez", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 76, "days_since": -1, "kpi": {"name": "Hannah Andrea Ibañez", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$1.32", "golden": "0.80%", "unlock": "33.33%", "cvr": "2.22%", "reply_time": "01:01", "msg_hr": "45.82"}, "alarms": [{"metric": "Sales/hr", "value": "$1.32", "threshold": 10}, {"metric": "CVR", "value": "2.22%", "threshold": 5}, {"metric": "Golden Ratio", "value": "0.80%", "threshold": 1}], "alarm_count": 3, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Yhana Jean Aguelo", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 76, "days_since": -1, "kpi": {"name": "Yhana Jean Aguelo", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$8.56", "golden": "0.79%", "unlock": "20.00%", "cvr": "2.14%", "reply_time": "03:01", "msg_hr": "83.00"}, "alarms": [{"metric": "Sales/hr", "value": "$8.56", "threshold": 10}, {"metric": "CVR", "value": "2.14%", "threshold": 5}, {"metric": "Golden Ratio", "value": "0.79%", "threshold": 1}], "alarm_count": 3, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Ruztinn Josef Francisco", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 68, "days_since": -1, "kpi": {"name": "Ruztinn Josef Francisco", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$8.50", "golden": "2.38%", "unlock": "30.30%", "cvr": "3.89%", "reply_time": "01:21", "msg_hr": "52.41"}, "alarms": [{"metric": "Sales/hr", "value": "$8.50", "threshold": 10}, {"metric": "CVR", "value": "3.89%", "threshold": 5}], "alarm_count": 2, "errors": 1, "recent_errors": [{"date": "2026-02-11", "text": "The chatter did not respond to the fan and left the message unread, which disrupts engagement and reflects poorly on res"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Adedeji Oyeniran", "team": "huckle", "team_display": "Team Huckle", "urgency": 64, "days_since": -1, "kpi": {"name": "Adedeji Oyeniran", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$6.72", "golden": "3.94%", "unlock": "27.91%", "cvr": "5.84%", "reply_time": "01:27", "msg_hr": "34.47"}, "alarms": [{"metric": "Sales/hr", "value": "$6.72", "threshold": 10}], "alarm_count": 1, "errors": 3, "recent_errors": [{"date": "2026-02-07", "text": "The chatter was not responding and appeared AFK during working hours, which negatively impacts fan engagement, service q"}, {"date": "2026-02-06", "text": "While he doesn't have any spent yet your job is to entertain him and get to know him better possibly converting him to s"}, {"date": "2026-02-06", "text": "The chatter left the fan without a response, which breaks the flow of the conversation and risks losing engagement and p"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "martin john aguilar", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 60, "days_since": -1, "kpi": {"name": "martin john aguilar", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$40.66", "golden": "4.57%", "unlock": "50.00%", "cvr": "8.15%", "reply_time": "01:59", "msg_hr": "32.83"}, "alarms": [], "alarm_count": 0, "errors": 6, "recent_errors": [{"date": "2026-02-11", "text": "The chatter’s response was dull and lacked engagement, which weakened the flow of the conversation and reduced the chanc"}, {"date": "2026-02-11", "text": "The chatter did not respond to the fan and left the message unread, which disrupts engagement and reflects poorly on res"}, {"date": "2026-02-07", "text": "The chatter did not respond to the message and left it unread, which disrupts conversation flow and can lead to lost eng"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Cris John Lacno", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 60, "days_since": -1, "kpi": {"name": "Cris John Lacno", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$142.21", "golden": "4.01%", "unlock": "37.14%", "cvr": "8.27%", "reply_time": "01:38", "msg_hr": "229.00"}, "alarms": [], "alarm_count": 0, "errors": 8, "recent_errors": [{"date": "2026-02-10", "text": "The chatter did not engage in proper sexting and instead sent a random teaser without building context or arousal, which"}, {"date": "2026-02-10", "text": "The response was dull and disengaging, which caused the conversation to lose momentum. More engaging replies, light teas"}, {"date": "2026-02-10", "text": "Chatters left the fan with no response and did not provide a proper way to end the conversation. This breaks the chat fl"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Ralf Zyre Bambalan", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 60, "days_since": -1, "kpi": {"name": "Ralf Zyre Bambalan", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$41.75", "golden": "2.85%", "unlock": "32.50%", "cvr": "5.56%", "reply_time": "01:15", "msg_hr": "63.13"}, "alarms": [], "alarm_count": 0, "errors": 6, "recent_errors": [{"date": "2026-02-10", "text": "The chatter’s responses were dull, especially considering the fan is a new subscriber. New subs should be welcomed with "}, {"date": "2026-02-09", "text": "The chatter was not engaging when dropping the PPV and responded in a dull, low-energy way, which reduced interest and m"}, {"date": "2026-02-07", "text": "The chatter did not send a follow-up message after the PPV purchase, missing an opportunity to reinforce engagement, bui"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Princess Diane Manalo", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 60, "days_since": -1, "kpi": {"name": "Princess Diane Manalo", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$76.35", "golden": "8.18%", "unlock": "27.17%", "cvr": "9.99%", "reply_time": "02:19", "msg_hr": "85.14"}, "alarms": [], "alarm_count": 0, "errors": 6, "recent_errors": [{"date": "2026-02-11", "text": "The chatter did not take the time to get to know the fan and attempted to sell immediately, which made the interaction f"}, {"date": "2026-02-10", "text": "The chatter gave dull responses and did not engage the conversation effectively, which limited the buildup needed to lea"}, {"date": "2026-02-10", "text": "The chatter was overly aggressive in pushing the PPV and priced it too high, especially considering the content was not "}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Adriane Ellor Sulita", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 60, "days_since": -1, "kpi": {"name": "Adriane Ellor Sulita", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$12.89", "golden": "2.97%", "unlock": "28.99%", "cvr": "4.95%", "reply_time": "00:57", "msg_hr": "58.86"}, "alarms": [{"metric": "CVR", "value": "4.95%", "threshold": 5}], "alarm_count": 1, "errors": 2, "recent_errors": [{"date": "2026-02-06", "text": "Adriane can't continue to shift due to the typhoon and not having electricity in their area; she has already assigned he"}, {"date": "2026-02-06", "text": "He should not have agreed to being spoken to or directed by the fan in that manner, as it does not align with the profes"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "MARY WAMBUI GITHIGE", "team": "huckle", "team_display": "Team Huckle", "urgency": 60, "days_since": -1, "kpi": {"name": "MARY WAMBUI GITHIGE", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$78.28", "golden": "3.36%", "unlock": "53.68%", "cvr": "7.78%", "reply_time": "02:20", "msg_hr": "88.43"}, "alarms": [], "alarm_count": 0, "errors": 7, "recent_errors": [{"date": "2026-02-09", "text": "The chatter did not respond to the message and left it unread, which disrupts conversation flow and can lead to lost eng"}, {"date": "2026-02-09", "text": "Clarifications for  Videocall platform and price."}, {"date": "2026-02-09", "text": "The chatter did not respond to the message and left it unread, which disrupts conversation flow and can lead to lost eng"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Cezar E. Edades Jr", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 60, "days_since": -1, "kpi": {"name": "Cezar E. Edades Jr", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$82.46", "golden": "3.93%", "unlock": "41.00%", "cvr": "7.52%", "reply_time": "01:50", "msg_hr": "101.05"}, "alarms": [], "alarm_count": 0, "errors": 5, "recent_errors": [{"date": "2026-02-10", "text": "The chatter’s approach was overly transactional, focusing on selling rather than building attraction, engagement, and a "}, {"date": "2026-02-06", "text": "The approach was overly transactional and jumped straight into pricing instead of building interest through texting and "}, {"date": "2026-02-06", "text": "There was no use of the script, including the No-Go Fan script, despite the fan clearly mentioning a card issue. This le"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Dionefel Mamites", "team": "huckle", "team_display": "Team Huckle", "urgency": 60, "days_since": -1, "kpi": {"name": "Dionefel Mamites", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$20.44", "golden": "3.90%", "unlock": "38.89%", "cvr": "8.45%", "reply_time": "01:14", "msg_hr": "53.89"}, "alarms": [], "alarm_count": 0, "errors": 8, "recent_errors": [{"date": "2026-02-11", "text": "Provided VC specifications about which platform the model be using and also the ideal price."}, {"date": "2026-02-11", "text": "The chatter did not respond to the message and left it unread, which disrupts conversation flow and can lead to lost eng"}, {"date": "2026-02-10", "text": "The conversation felt too transactional. There should be a smoother, more natural way to close the interaction—one that "}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Don Mc Rey Parone", "team": "huckle", "team_display": "Team Huckle", "urgency": 56, "days_since": -1, "kpi": {"name": "Don Mc Rey Parone", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$11.24", "golden": "2.24%", "unlock": "31.71%", "cvr": "2.93%", "reply_time": "01:10", "msg_hr": "47.28"}, "alarms": [{"metric": "CVR", "value": "2.93%", "threshold": 5}], "alarm_count": 1, "errors": 1, "recent_errors": [{"date": "2026-02-11", "text": "The chatter did not respond to the fan and left the message unread, which disrupts engagement and reflects poorly on res"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "JOHN ARSEL MUHI ", "team": "huckle", "team_display": "Team Huckle", "urgency": 56, "days_since": -1, "kpi": {"name": "JOHN ARSEL MUHI ", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$52.01", "golden": "7.94%", "unlock": "29.02%", "cvr": "7.90%", "reply_time": "03:04", "msg_hr": "93.66"}, "alarms": [], "alarm_count": 0, "errors": 4, "recent_errors": [{"date": "2026-02-11", "text": "The chatter did not respond to the message and left it unread, which disrupts conversation flow and can lead to lost eng"}, {"date": "2026-02-10", "text": "The approach toward the new fan came across as rude. A more respectful tone and a proper, polite exit should have been u"}, {"date": "2026-02-10", "text": "The chatter did not respond to the message and left it unread, which disrupts conversation flow and can lead to lost eng"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Leny Rose L. Noma", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 52, "days_since": -1, "kpi": {"name": "Leny Rose L. Noma", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$13.55", "golden": "5.33%", "unlock": "26.15%", "cvr": "9.45%", "reply_time": "01:19", "msg_hr": "56.13"}, "alarms": [], "alarm_count": 0, "errors": 3, "recent_errors": [{"date": "2026-02-10", "text": "The chatter did not follow the inflow script and ignored the manager’s instructions. Moving forward, it’s important to s"}, {"date": "2026-02-06", "text": "The chatter did not follow the inflow script and instead used a personal script, which disrupted the intended flow and r"}, {"date": "2026-02-06", "text": "The chatter did not follow the inflow script and instead used a personal script, which disrupted the intended flow and r"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Rachael Yvonne Murugi", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 52, "days_since": -1, "kpi": {"name": "Rachael Yvonne Murugi", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$8.18", "golden": "3.66%", "unlock": "28.21%", "cvr": "5.68%", "reply_time": "02:33", "msg_hr": "29.01"}, "alarms": [{"metric": "Sales/hr", "value": "$8.18", "threshold": 10}], "alarm_count": 1, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Emmanuel Okoth Owino", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 52, "days_since": -1, "kpi": {"name": "Emmanuel Okoth Owino", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$5.93", "golden": "4.56%", "unlock": "20.00%", "cvr": "6.55%", "reply_time": "02:01", "msg_hr": "30.45"}, "alarms": [{"metric": "Sales/hr", "value": "$5.93", "threshold": 10}], "alarm_count": 1, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Fiona Ajiambo", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 48, "days_since": -1, "kpi": {"name": "Fiona Ajiambo", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$16.06", "golden": "3.22%", "unlock": "40.68%", "cvr": "5.22%", "reply_time": "04:04", "msg_hr": "46.69"}, "alarms": [], "alarm_count": 0, "errors": 2, "recent_errors": [{"date": "2026-02-11", "text": "Missed this sub on Lana, this is clearly a missed opportunity. Please make sure to reply to him"}, {"date": "2026-02-11", "text": "Made an announcement asking everyone to handle unattended AI chats for 5-10 minutes. "}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Matt Yuri V. Albarillo", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 44, "days_since": -1, "kpi": {"name": "Matt Yuri V. Albarillo", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$116.44", "golden": "3.11%", "unlock": "60.00%", "cvr": "10.07%", "reply_time": "01:43", "msg_hr": "81.04"}, "alarms": [], "alarm_count": 0, "errors": 1, "recent_errors": [{"date": "2026-02-04", "text": "The chatter’s sales performance was significantly below expectations, with minimal effort or effectiveness in driving pu"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Steven Mwamuye", "team": "huckle", "team_display": "Team Huckle", "urgency": 44, "days_since": -1, "kpi": {"name": "Steven Mwamuye", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$31.42", "golden": "6.97%", "unlock": "27.57%", "cvr": "8.62%", "reply_time": "00:53", "msg_hr": "80.41"}, "alarms": [], "alarm_count": 0, "errors": 1, "recent_errors": [{"date": "2026-02-09", "text": "Keep replies more immediate while building rapport, as long pauses (like the 7-minute gap here) can break the flow and k"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Jhunmar Velasco", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 44, "days_since": -1, "kpi": {"name": "Jhunmar Velasco", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$59.91", "golden": "5.84%", "unlock": "30.47%", "cvr": "7.44%", "reply_time": "02:40", "msg_hr": "105.69"}, "alarms": [], "alarm_count": 0, "errors": 1, "recent_errors": [{"date": "2026-02-11", "text": "Pitch the price to the sub first before we're gonna confirm it to our client. We need to make sure how willing is the su"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Sheenmy A. Miro", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 44, "days_since": -1, "kpi": {"name": "Sheenmy A. Miro", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$30.81", "golden": "7.41%", "unlock": "30.05%", "cvr": "10.22%", "reply_time": "01:55", "msg_hr": "59.07"}, "alarms": [], "alarm_count": 0, "errors": 1, "recent_errors": [{"date": "2026-02-04", "text": "Sheenmy didn't clock in, and I reassigned her teams to the chatter who were available to cover and to handle it until EO"}], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Edgar Danson ", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 40, "days_since": -1, "kpi": {"name": "Edgar Danson ", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$18.13", "golden": "3.28%", "unlock": "35.29%", "cvr": "7.47%", "reply_time": "01:53", "msg_hr": "56.27"}, "alarms": [], "alarm_count": 0, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Angel Joyce Ranosa", "team": "huckle", "team_display": "Team Huckle", "urgency": 40, "days_since": -1, "kpi": {"name": "Angel Joyce Ranosa", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$17.61", "golden": "5.94%", "unlock": "25.71%", "cvr": "6.33%", "reply_time": "03:26", "msg_hr": "44.72"}, "alarms": [], "alarm_count": 0, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Kokoette Okon Umanah", "team": "danilyn", "team_display": "Team Danilyn", "urgency": 40, "days_since": -1, "kpi": {"name": "Kokoette Okon Umanah", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$28.43", "golden": "4.56%", "unlock": "42.35%", "cvr": "9.35%", "reply_time": "01:32", "msg_hr": "46.34"}, "alarms": [], "alarm_count": 0, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Trishia Izze Casangyao", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 40, "days_since": -1, "kpi": {"name": "Trishia Izze Casangyao", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$17.69", "golden": "2.94%", "unlock": "28.57%", "cvr": "5.20%", "reply_time": "00:53", "msg_hr": "77.36"}, "alarms": [], "alarm_count": 0, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Kimberly Gaile Diaz Bacani", "team": "ezekiel", "team_display": "Team Ezekiel", "urgency": 40, "days_since": -1, "kpi": {"name": "Kimberly Gaile Diaz Bacani", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$70.79", "golden": "5.69%", "unlock": "33.76%", "cvr": "9.40%", "reply_time": "03:16", "msg_hr": "195.69"}, "alarms": [], "alarm_count": 0, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Earl Clyde Leinand Ty", "team": "huckle", "team_display": "Team Huckle", "urgency": 40, "days_since": -1, "kpi": {"name": "Earl Clyde Leinand Ty", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$18.10", "golden": "4.42%", "unlock": "24.53%", "cvr": "5.10%", "reply_time": "02:06", "msg_hr": "89.83"}, "alarms": [], "alarm_count": 0, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}, {"name": "Allonah Yvonne D. Tumampos", "team": "huckle", "team_display": "Team Huckle", "urgency": 40, "days_since": -1, "kpi": {"name": "Allonah Yvonne D. Tumampos", "period": "2026-01-26 to 2026-02-01", "sales_hr": "$23.21", "golden": "4.16%", "unlock": "35.97%", "cvr": "5.86%", "reply_time": "01:40", "msg_hr": "66.29"}, "alarms": [], "alarm_count": 0, "errors": 0, "recent_errors": [], "last_coached": null, "last_notes": "", "last_action": ""}], "tl": {"huckle": {"name": "Huckle", "shift": "00:00–08:00", "shift_start": 0, "shift_end": 8, "color": "#58a6ff", "total": 11, "coached_week": 0, "sessions_week": 0, "kpi_alarms": 4}, "danilyn": {"name": "Danilyn", "shift": "08:00–16:00", "shift_start": 8, "shift_end": 16, "color": "#d2a8ff", "total": 11, "coached_week": 0, "sessions_week": 0, "kpi_alarms": 4}, "ezekiel": {"name": "Ezekiel", "shift": "16:00–00:00", "shift_start": 16, "shift_end": 24, "color": "#7ee787", "total": 9, "coached_week": 0, "sessions_week": 0, "kpi_alarms": 2}}, "logs": [], "no_team": [], "generated": "2026-02-11 13:09 UTC", "current_hour": 13};
+
+// ── Helpers ──
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const h = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className=cls; if(html) e.innerHTML=html; return e; };
+
+function urgColor(u) { return u >= 70 ? '#f85149' : u >= 40 ? '#d29922' : '#3fb950'; }
+function daysBadge(d) {
+  if(d < 0) return '<span class="badge b-red">Never</span>';
+  if(d >= 14) return `<span class="badge b-red">${d}d</span>`;
+  if(d >= 5) return `<span class="badge b-yellow">${d}d</span>`;
+  return `<span class="badge b-green">${d}d</span>`;
+}
+function kpiColor(val, thresh) {
+  if(val === null) return '#484f58';
+  const ratio = val / thresh;
+  return ratio < 0.6 ? '#f85149' : ratio < 1 ? '#d29922' : '#3fb950';
+}
+function pn(v) { try { return parseFloat(String(v).replace(/[$%,]/g,'')); } catch(e) { return null; } }
+
+// ── Tab nav ──
+$$('.nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('.nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    $$('.section').forEach(s => s.classList.remove('active'));
+    $(`#sec-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+// ── Overview ──
+function renderOverview() {
+  const totalChatters = D.chatters.length;
+  const totalLogs = D.logs.length;
+  const totalAlarms = D.chatters.filter(c => c.alarm_count > 0).length;
+  const noTeam = D.no_team.length;
+
+  // Current shift
+  const hour = D.current_hour;
+  let onShift = null;
+  Object.entries(D.tl).forEach(([k, v]) => {
+    if(v.shift_start <= hour && hour < v.shift_end) onShift = k;
+    if(v.shift_start > v.shift_end && (hour >= v.shift_start || hour < v.shift_end)) onShift = k;
+  });
+
+  $('#genTime').innerHTML = `Last updated: ${D.generated}` +
+    (onShift ? ` &nbsp;|&nbsp; <span class="live-dot"></span> ${D.tl[onShift].name} on shift` : '');
+
+  $('#topStats').innerHTML = `
+    <div class="stat-card"><div class="num" style="color:#58a6ff">${totalChatters}</div><div class="lbl">Active Chatters</div></div>
+    <div class="stat-card"><div class="num" style="color:#3fb950">${totalLogs}</div><div class="lbl">Coaching Sessions</div></div>
+    <div class="stat-card"><div class="num" style="color:${totalAlarms>0?'#f85149':'#3fb950'}">${totalAlarms}</div><div class="lbl">KPI Alarms</div></div>
+    <div class="stat-card"><div class="num" style="color:${noTeam>0?'#d29922':'#3fb950'}">${noTeam}</div><div class="lbl">Unassigned</div></div>
+  `;
+
+  if(noTeam > 0) {
+    $('#alertBanner').innerHTML = `<div class="alert-banner"><strong>${noTeam} chatters without team:</strong> ${D.no_team.join(', ')}</div>`;
+  }
+
+  // TL cards
+  let cards = '';
+  ['huckle','danilyn','ezekiel'].forEach(k => {
+    const t = D.tl[k];
+    const pct = t.total > 0 ? Math.round(t.coached_week / t.total * 100) : 0;
+    const barC = pct >= 70 ? '#3fb950' : pct >= 30 ? '#d29922' : '#f85149';
+    const isOn = onShift === k;
+    cards += `
+    <div class="tl-card" onclick="$$('.nav button').forEach(b=>{if(b.dataset.tab==='${k}')b.click()})" style="border-color:${isOn?t.color:'#30363d'}">
+      <div class="tl-top">
+        <div class="tl-name" style="color:${t.color}">${isOn?'<span class="live-dot"></span>':''}${t.name}</div>
+        <span class="tl-shift-badge" style="background:${t.color}22;color:${t.color};border:1px solid ${t.color}33">${t.shift} UTC</span>
+      </div>
+      <div class="tl-nums">
+        <div class="n"><div class="v">${t.total}</div><div class="l">Chatters</div></div>
+        <div class="n"><div class="v">${t.sessions_week}</div><div class="l">Sessions</div></div>
+        <div class="n"><div class="v" style="color:${t.kpi_alarms>0?'#f85149':'#3fb950'}">${t.kpi_alarms}</div><div class="l">Alarms</div></div>
+        <div class="n"><div class="v">${pct}%</div><div class="l">Coverage</div></div>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barC}"></div></div>
+      <div class="bar-label">${t.coached_week}/${t.total} coached this week</div>
+    </div>`;
+  });
+  $('#tlCards').innerHTML = cards;
+
+  renderChatterGrid('overview', D.chatters, 'allChatters');
+}
+
+// ── Chatter card ──
+function chatterCard(c) {
+  const uc = urgColor(c.urgency);
+  const hasAlarm = c.alarm_count > 0;
+
+  let tags = '';
+  if(hasAlarm) tags += `<span class="tag t-red">${c.alarm_count} KPI</span>`;
+  if(c.errors > 0) tags += `<span class="tag t-orange">${c.errors} errors</span>`;
+  if(!hasAlarm && c.errors === 0) tags += `<span class="tag t-green">OK</span>`;
+  tags += ` ${daysBadge(c.days_since)}`;
+
+  let kpiHtml = '';
+  const kpiDefs = [
+    {key:'sales_hr',label:'Sales/hr',thresh:10,prefix:'$'},
+    {key:'cvr',label:'CVR',thresh:5,suffix:'%'},
+    {key:'unlock',label:'Unlock',thresh:20,suffix:'%'},
+    {key:'golden',label:'Golden',thresh:1,suffix:'%'},
+    {key:'reply_time',label:'Reply',thresh:null},
+    {key:'msg_hr',label:'Msg/hr',thresh:null},
+  ];
+  if(c.kpi && Object.keys(c.kpi).length > 1) {
+    kpiDefs.forEach(d => {
+      const raw = c.kpi[d.key];
+      if(!raw) return;
+      const v = pn(raw);
+      const col = d.thresh ? kpiColor(v, d.thresh) : '#58a6ff';
+      const pct = d.thresh && v !== null ? Math.min(100, Math.round(v / d.thresh * 100)) : 50;
+      kpiHtml += `<div class="kpi-item"><div class="kpi-label">${d.label}</div><div class="kpi-val" style="color:${col}">${raw}</div>` +
+        (d.thresh ? `<div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%;background:${col}"></div></div>` : '') +
+        `</div>`;
+    });
+  }
+
+  let errHtml = '';
+  if(c.recent_errors && c.recent_errors.length > 0) {
+    c.recent_errors.forEach(e => {
+      errHtml += `<div class="err-item">[${e.date}] ${e.text}</div>`;
+    });
+  }
+
+  let coachHtml = '';
+  if(c.last_notes) coachHtml += `<p style="color:#8b949e">${c.last_notes}</p>`;
+  if(c.last_action) coachHtml += `<p style="color:#d2a8ff">Action: ${c.last_action}</p>`;
+
+  const id = 'ch-' + c.name.replace(/[^a-zA-Z0-9]/g,'_');
+
+  return `
+  <div class="ch-card ${hasAlarm?'alarm':''}" id="${id}">
+    <div class="ch-main" onclick="document.querySelector('#${id} .ch-detail').classList.toggle('open')">
+      <div class="ch-left">
+        <div class="ch-name">${c.name}</div>
+        <div class="ch-meta">${tags} <span class="tag t-blue">${c.team_display}</span></div>
+      </div>
+      <div class="ch-right">
+        <div class="ch-urg" style="color:${uc}">${c.urgency}</div>
+        <div class="ch-urg-label">urgency</div>
+      </div>
+    </div>
+    <div class="ch-detail">
+      ${kpiHtml ? '<div class="kpi-grid">'+kpiHtml+'</div>' : ''}
+      ${errHtml ? '<div class="detail-section"><h4>Recent Issues</h4>'+errHtml+'</div>' : ''}
+      ${coachHtml ? '<div class="detail-section"><h4>Last Coaching</h4>'+coachHtml+'</div>' : ''}
+      ${!kpiHtml && !errHtml && !coachHtml ? '<p style="color:#484f58;padding:10px">No additional data</p>' : ''}
+    </div>
+  </div>`;
+}
+
+// ── Render chatter grid with filtering/sorting ──
+let sortState = {overview:'urgency',huckle:'urgency',danilyn:'urgency',ezekiel:'urgency'};
+let filterState = {overview:'all',huckle:'all',danilyn:'all',ezekiel:'all'};
+
+function renderChatterGrid(ctx, chatters, containerId) {
+  const s = sortState[ctx];
+  const f = filterState[ctx];
+  let list = [...chatters];
+
+  // Filter
+  if(f === 'alarm') list = list.filter(c => c.alarm_count > 0);
+  if(f === 'nocoach') list = list.filter(c => c.days_since < 0);
+
+  // Search
+  const searchEl = $(`#search${ctx.charAt(0).toUpperCase()+ctx.slice(1)}`) || $('#searchAll');
+  if(searchEl && searchEl.value) {
+    const q = searchEl.value.toLowerCase();
+    list = list.filter(c => c.name.toLowerCase().includes(q));
+  }
+
+  // Sort
+  if(s === 'urgency') list.sort((a,b) => b.urgency - a.urgency);
+  if(s === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+  if(s === 'days') list.sort((a,b) => (b.days_since < 0 ? 9999 : b.days_since) - (a.days_since < 0 ? 9999 : a.days_since));
+  if(s === 'alarms') list.sort((a,b) => b.alarm_count - a.alarm_count || b.urgency - a.urgency);
+
+  $(`#${containerId}`).innerHTML = list.length > 0
+    ? list.map(c => chatterCard(c)).join('')
+    : '<div class="empty"><p>No chatters match filters</p></div>';
+}
+
+function toggleFilter(btn, ctx) {
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  filterState[ctx] = btn.dataset.f;
+  const cid = ctx === 'overview' ? 'allChatters' : ctx+'Chatters';
+  const chatters = ctx === 'overview' ? D.chatters : D.chatters.filter(c => c.team === ctx);
+  renderChatterGrid(ctx, chatters, cid);
+}
+
+function setSort(btn, ctx) {
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  sortState[ctx] = btn.dataset.s;
+  const cid = ctx === 'overview' ? 'allChatters' : ctx+'Chatters';
+  const chatters = ctx === 'overview' ? D.chatters : D.chatters.filter(c => c.team === ctx);
+  renderChatterGrid(ctx, chatters, cid);
+}
+
+// ── TL detail tabs ──
+function renderTLTab(k) {
+  const t = D.tl[k];
+  const members = D.chatters.filter(c => c.team === k);
+  const sec = $(`#sec-${k}`);
+
+  sec.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div style="font-size:1.4em;font-weight:700;color:${t.color}">${t.name}</div>
+      <span class="tl-shift-badge" style="background:${t.color}22;color:${t.color};border:1px solid ${t.color}33">${t.shift} UTC</span>
+      <span style="color:#8b949e;font-size:.85em">${t.total} chatters</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="num" style="color:${t.color}">${t.total}</div><div class="lbl">Chatters</div></div>
+      <div class="stat-card"><div class="num" style="color:#3fb950">${t.sessions_week}</div><div class="lbl">Sessions this week</div></div>
+      <div class="stat-card"><div class="num" style="color:${t.kpi_alarms>0?'#f85149':'#3fb950'}">${t.kpi_alarms}</div><div class="lbl">KPI Alarms</div></div>
+      <div class="stat-card"><div class="num">${t.coached_week}/${t.total}</div><div class="lbl">Coached this week</div></div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="search${k.charAt(0).toUpperCase()+k.slice(1)}" placeholder="Search..." oninput="renderChatterGrid('${k}',D.chatters.filter(c=>c.team==='${k}'),'${k}Chatters')">
+      <button class="filter-btn on" data-f="all" onclick="toggleFilter(this,'${k}')">All</button>
+      <button class="filter-btn" data-f="alarm" onclick="toggleFilter(this,'${k}')">With Alarms</button>
+      <button class="filter-btn" data-f="nocoach" onclick="toggleFilter(this,'${k}')">Never Coached</button>
+    </div>
+    <div class="sort-bar">
+      <button class="sort-btn active" data-s="urgency" onclick="setSort(this,'${k}')">Urgency</button>
+      <button class="sort-btn" data-s="name" onclick="setSort(this,'${k}')">Name</button>
+      <button class="sort-btn" data-s="days" onclick="setSort(this,'${k}')">Days Since</button>
+      <button class="sort-btn" data-s="alarms" onclick="setSort(this,'${k}')">Alarms</button>
+    </div>
+    <div class="chatter-grid" id="${k}Chatters"></div>
+  `;
+
+  renderChatterGrid(k, members, k+'Chatters');
+}
+
+// ── Alarms table ──
+function renderAlarms() {
+  const alarmed = D.chatters.filter(c => c.alarm_count > 0).sort((a,b) => b.alarm_count - a.alarm_count);
+  let rows = '<thead><tr><th>Chatter</th><th>Team</th><th>Alarms</th><th>Period</th></tr></thead><tbody>';
+  if(alarmed.length === 0) {
+    rows += '<tr><td colspan="4" style="text-align:center;padding:24px;color:#484f58">No KPI alarms</td></tr>';
+  } else {
+    alarmed.forEach(c => {
+      const tags = c.alarms.map(a => `<span class="tag t-red">${a.metric}: ${a.value}</span>`).join(' ');
+      rows += `<tr><td style="font-weight:500">${c.name}</td><td>${c.team_display}</td><td>${tags}</td><td style="color:#8b949e;font-size:.85em">${c.kpi.period||''}</td></tr>`;
+    });
+  }
+  rows += '</tbody>';
+  $('#alarmTable').innerHTML = rows;
+}
+
+// ── Activity log ──
+function renderActivity() {
+  if(D.logs.length === 0) {
+    $('#activityContainer').innerHTML = '<div class="empty"><p>No coaching sessions logged yet.</p><p>TLs need to start using the coaching form.</p></div>';
+    return;
+  }
+  let rows = '<table class="log-table"><thead><tr><th>Date</th><th>TL</th><th>Chatter</th><th>Method</th><th>Notes</th></tr></thead><tbody>';
+  D.logs.forEach(l => {
+    const eng = l.engagement ? ` (Eng: ${l.engagement}/10)` : '';
+    const dur = l.duration ? ` ${l.duration}min` : '';
+    const notes = l.notes ? (l.notes.length > 80 ? l.notes.slice(0,77)+'...' : l.notes) : '';
+    rows += `<tr><td>${l.date}</td><td style="color:#58a6ff;font-weight:500">${l.tl}</td><td style="font-weight:500">${l.chatter}</td><td>${l.method||''}${dur}${eng}</td><td class="log-notes-cell">${notes}</td></tr>`;
+  });
+  rows += '</tbody></table>';
+  $('#activityContainer').innerHTML = rows;
+}
+
+// ── Search binding ──
+$('#searchAll').addEventListener('input', () => renderChatterGrid('overview', D.chatters, 'allChatters'));
+
+// ── Init ──
+renderOverview();
+['huckle','danilyn','ezekiel'].forEach(k => renderTLTab(k));
+renderAlarms();
+renderActivity();
+</script>
 </body>
 </html>
